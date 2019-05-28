@@ -1,0 +1,162 @@
+#------------------------------------------------------------------------
+# Lab 11-12: MiniProject : Towers of Hanoi
+#
+# Name: Molly Moore : moorem24 : Comp 411 : Spring 2017
+#
+#---------------------------------------------------------------------------#
+
+.data 0x0
+	newline: 	.asciiz "\n"
+	part1:		.asciiz "Move disk "
+        part2:		.asciiz " from Peg "
+        part3:		.asciiz " to Peg "
+.text 0x3000
+
+#============================MAIN PROCEDURE=================================#
+main:
+
+	add $fp, $sp, $0		# set frame pointer
+
+	li $v0, 5			# load call to read integer
+	syscall				# read numDisks into Reg[$v0]
+
+	add $a0, $v0, $0		# numDisks added to Reg[$a0]
+        addi $a1, $0, 1			# source peg "1" added to Reg[$a1]
+	addi $a2, $0, 2			# spare peg "2" added to Reg[$a2]
+	addi $a3, $0, 3			# destination peg "3" added to Reg[$a3]  
+
+	jal hanoi			# call hanoi procedure
+	
+	j Exit				# jump to end program: Exit
+
+#==============================END MAIN=====================================#
+
+
+
+#======================TOWERS OF HANOI PROCEDURE============================#
+hanoi:
+	addi $t1, $0, 1
+	bne $a0, $t1, else		# if (n != 1) jump to else
+	
+	add $t0, $a0, $0		# store value of (n) in Reg[$t1]
+	
+	li $v0, 4			# load to print string
+	la $a0, part1			# prints "Move disk "
+	syscall
+
+	li $v0, 1			# load to print integer
+	add $a0, $t0, $0		# prints value of (n)
+	syscall	
+
+	li $v0, 4			# load to print string
+	la $a0, part2			# prints " from Peg "
+	syscall
+
+	li $v0, 1			# load to print integer
+	add $a0, $a1, $0		# prints value of (source peg)
+	syscall	
+
+	li $v0, 4			# load to print string
+	la $a0, part3			# prints " to Peg "
+	syscall
+
+	li $v0, 1			# load to print integer
+	add $a0, $a3, $0		# prints value of (destination peg)
+	syscall	
+
+	li $v0, 4			# load to print string
+	la $a0, newline			# prints newline
+	syscall
+
+	jr $ra				# return
+
+
+else:
+	#---REC-1: calling hanoi(n-1, source, destination, spare)-----#
+	addi $sp, $sp, -20		# make room on stack for $ra and $a0-$a3
+	sw $ra, 16($sp)			# save return address
+	sw $a0, 12($sp)			# save value of (n)
+	sw $a1, 8($sp)			# save value of (source peg)  
+	sw $a2, 4($sp)			# save value of (spare peg)
+	sw $a3, 0($sp)			# save value of (destination peg)
+
+	addi $a0, $a0, -1		# decrement (n) by 1
+	addi $t2, $a2, 0		# temp to swap destination and spare
+	addi $a2, $a3, 0		# swap spare to destination
+	addi $a3, $t2, 0		# destination to spare
+	
+	jal hanoi			# recursive call to hanoi procedure	
+
+	lw $a3, 0($sp)			# restore value of (destination peg)
+	lw $a2, 4($sp)			# restore value of (spare peg)
+	lw $a1, 8($sp)			# restore value of (source peg)
+	lw $a0, 12($sp)			# restore value of (n)
+	lw $ra, 16($sp)			# restore value of return address
+	addi $sp, $sp, 20		# de-allocate stack space
+
+	#-------------------print move---------------------------------#
+	add $t0, $a0, $0		# preserve value of (n)
+
+	li $v0, 4			# load to print string
+	la $a0, part1			# prints "Move disk "
+	syscall
+
+	li $v0, 1			# load to print integer
+	add $a0, $t0, $0		# prints value of (n)
+	syscall	
+
+	li $v0, 4			# load to print string
+	la $a0, part2			# prints " from Peg "
+	syscall
+
+	li $v0, 1			# load to print integer
+	add $a0, $a1, $0		# prints value of (source peg)
+	syscall	
+
+	li $v0, 4			# load to print string
+	la $a0, part3			# prints " to Peg "
+	syscall
+
+	li $v0, 1			# load to print integer
+	add $a0, $a3, $0		# prints value of (destination peg)
+	syscall	
+
+	li $v0, 4			# load to print string
+	la $a0, newline			# prints newline
+	syscall
+
+	add $a0, $t0, $0		# restore value of (n)
+
+	#---REC-2: calling hanoi(n-1, spare, source, destination)-----#
+	addi $sp, $sp, -20		# make room on stack for $ra and $a0-$a3
+	sw $ra, 16($sp)			# save return address
+	sw $a0, 12($sp)			# save value of (n)
+	sw $a1, 8($sp)			# save value of (source peg)  
+	sw $a2, 4($sp)			# save value of (spare peg)
+	sw $a3, 0($sp)			# save value of (destination peg)
+
+	addi $a0, $a0, -1		# decrement (n) by 1
+	addi $t3, $a1, 0		# temp to swap source and spare
+	addi $a1, $a2, 0		# swap source to spare        
+	addi $a2, $t3, 0		# swap spare to source
+	
+	jal hanoi			# recursive call to hanoi procedure	
+
+	lw $a3, 0($sp)			# restore value of (destination peg)
+	lw $a2, 4($sp)			# restore value of (spare peg)
+	lw $a1, 8($sp)			# restore value of (source peg)   
+	lw $a0, 12($sp)			# restore value of (n)
+	lw $ra, 16($sp)			# restore value of return address
+	addi $sp, $sp, 20		# de-allocate stack space
+
+	#----------return after second recursion--------------------#
+	jr $ra
+#==============================END TOWERS===================================#
+
+
+
+#========================EXIT PROGRAM======================================#
+Exit:
+	ori $v0, $0, 10			# System call code 10 for exit
+	syscall				# exit the program
+#=======================END EXIT===========================================#

@@ -1,0 +1,43 @@
+/* Lab 11_12 : MiniProject :  Towers of Hanoi */
+/* Comp 411 : Spring 2017 : Molly Moore */
+
+#include <stdio.h>
+
+
+/****************************TOWERS OF HANOI PROCEDURE*********************************/
+/* Recursive procedure to solve Towers of Hanoi for N disks by printing moves */
+void hanoi(int n, int source, int spare, int dest) {
+
+  if (n == 1) {
+    printf("Move disk %d from Peg %d to Peg %d\n", n, source, dest);
+    return;
+  } // end base case
+  else {
+    hanoi(n-1, source, dest, spare);
+    printf("Move disk %d from Peg %d to Peg %d\n", n, source, dest);
+    hanoi(n-1, spare, source, dest); 	
+  } // end recursive body
+
+} // end hanoi procedure
+/************************************END HANOI*****************************************/
+
+
+
+
+/*********************************MAIN PROCEDURE***************************************/
+main() 
+{
+  int a = 1;
+  int b = 2;
+  int c = 3;
+  int numDisks;
+
+  scanf("%i", &numDisks);
+
+  hanoi(numDisks, a, b, c);
+
+} // end main
+/*************************************END MAIN*****************************************/
+
+
+
